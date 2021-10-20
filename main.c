@@ -9,31 +9,11 @@
 
 #define RFC_BASE_URL "https://www.rfc-editor.org/rfc/rfc"
 
-// Data Structs
-
-struct string {
-	char *data;
-	size_t length;
-};
-
 // Functions
 
-size_t writefunc(void *contents, size_t size, size_t nmemb, void *userp) {
-	size_t realsize = size * nmemb;
-	struct string *str = (struct string *)userp;
-
-	char *ptr = realloc(str->data, str->length + realsize + 1);
-	if (!ptr) {
-		printf("realloc() failed: not enough memory\n");
-		return 0;
-	}
-
-	str->data = ptr;
-	memcpy(&(str->data[str->length]), contents, realsize);
-	str->length += realsize;
-	str->data[str->length] = '\0';
-
-	return realsize;
+size_t writefunc(void *contents, size_t size, size_t nmemb) {
+	printf("%.*s\n", size * nmemb, contents);
+	return size * nmemb;
 }
 
 void print_version() {
@@ -63,11 +43,7 @@ int main(int argc, char *argv[]) {
 		CURL *curl_handle;
 		CURLcode res;
 
-		struct string str;
-		str.data = malloc(1);
-		str.length = 0;
-
-		char *url = malloc(sizeof(RFC_BASE_URL) + (int)(rfc_number == 0 ? 1 : log10(rfc_number) + 1));
+		char *url = malloc(sizeof(RFC_BASE_URL) + (int)(rfc_number < 10 ? 2 : log10(rfc_number) + 1));
 		sprintf(url, "%s%u.txt", RFC_BASE_URL, rfc_number);
 
 		curl_global_init(CURL_GLOBAL_ALL);
@@ -76,15 +52,12 @@ int main(int argc, char *argv[]) {
 
 		curl_easy_setopt(curl_handle, CURLOPT_URL, url);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, writefunc);
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&str);
 
 		res = curl_easy_perform(curl_handle);
-
+		
 		if (res != CURLE_OK) {
 			fprintf(stderr, "curl_easy_perform() failed: %s\n",
 				curl_easy_strerror(res));
-		} else {
-			printf("%s", str.data);
 		}
 
 		curl_easy_cleanup(curl_handle);
