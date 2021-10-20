@@ -1,4 +1,4 @@
-CC = cc
+CC = gcc
 BIN := rfc
 
 MAIN_FILE := main
@@ -13,7 +13,10 @@ clean:
 	-rm $(MAIN_FILE).o
 
 $(BIN): $(MAIN_FILE).o
-	cc -o $(BIN) $(MAIN_FILE).o $(LDFLAGS)
+	$(CC) -o $(BIN) $(MAIN_FILE).o $(LDFLAGS)
 
 main.o: main.c
-	cc -c $(MAIN_FILE).c $(CFLAGS)
+	$(CC) -c $(MAIN_FILE).c $(CFLAGS)
+
+install: $(BIN)
+	install -Dm755 $(BIN) /usr/bin/$(BIN)
