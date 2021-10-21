@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 		CURL *curl_handle;
 		CURLcode res;
 
-		char *url = malloc(sizeof(RFC_BASE_URL) + (int)(rfc_number < 10 ? 2 : log10(rfc_number) + 1));
+		char *url = malloc(sizeof(RFC_BASE_URL) + 10);
 		sprintf(url, "%s%u.txt", RFC_BASE_URL, rfc_number);
 
 		curl_global_init(CURL_GLOBAL_ALL);
