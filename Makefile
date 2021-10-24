@@ -3,7 +3,7 @@ BIN := rfc
 
 MAIN_FILE := main
 
-CFLAGS := $(shell curl-config --cflags) 
+CFLAGS := $(shell curl-config --cflags) -O3
 LDFLAGS := $(shell curl-config --libs) -lm
 
 
