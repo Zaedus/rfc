@@ -70,13 +70,11 @@ int main(int argc, char *argv[]) {
 				long status;
 				curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &status);
 
-				if (status != 200) {
-					if (status == 404) printf("error: invalid rfc number '%lu'\n", rfc_number);
-					else printf("error: server returned status code %lu", status);
+				if (status == 404) printf("error: invalid rfc number '%lu'\n", rfc_number);
+				else printf("error: server returned status code %lu", status);
 
-					exit(EXIT_FAILURE);
-				}
-			} else fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+				exit(EXIT_FAILURE);
+			} else fprintf(stderr, "error: %s\n", curl_easy_strerror(res));
 		}
 
 		curl_easy_cleanup(curl_handle);
