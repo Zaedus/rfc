@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 		CURLcode res;
 
 		char *url = malloc(sizeof(RFC_BASE_URL) + 10);
-		sprintf(url, "%s%u.txt", RFC_BASE_URL, rfc_number);
+		sprintf(url, "%s%lu.txt", RFC_BASE_URL, rfc_number);
 
 		curl_global_init(CURL_GLOBAL_ALL);
 
@@ -61,12 +61,22 @@ int main(int argc, char *argv[]) {
 
 		curl_easy_setopt(curl_handle, CURLOPT_URL, url);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, writefunc);
+		curl_easy_setopt(curl_handle, CURLOPT_FAILONERROR, 1L);
 
 		res = curl_easy_perform(curl_handle);
 		
 		if (res != CURLE_OK) {
-			fprintf(stderr, "curl_easy_perform() failed: %s\n",
-				curl_easy_strerror(res));
+			if (res == CURLE_HTTP_RETURNED_ERROR) {
+				long status;
+				curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &status);
+
+				if (status != 200) {
+					if (status == 404) printf("error: invalid rfc number '%lu'\n", rfc_number);
+					else printf("error: server returned status code %lu", status);
+
+					exit(EXIT_FAILURE);
+				}
+			} else fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 		}
 
 		curl_easy_cleanup(curl_handle);
