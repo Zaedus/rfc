@@ -12,6 +12,7 @@
 // Functions
 
 size_t writefunc(void *contents, size_t size, size_t nmemb) {
+	// print all the bytes stored in 'content'
 	printf("%.*s\n", size * nmemb, contents);
 	return size * nmemb;
 }
@@ -27,14 +28,16 @@ void print_usage() {
 int main(int argc, char *argv[]) {
 	if (argc > 1) {
 		int rfc_number = 0;
+
+		// Iterate over all args and handle them accordingly
 		for (argc--, argv++; *argv; argc--, argv++) {
-			if (strncasecmp(*argv, "-V", 2) == 0) {
+			if (strncasecmp(*argv, "-V", 2) == 0 || strncasecmp(*argv, "--version", 2) == 0) {
 				print_version();
-				exit(EXIT_FAILURE);
+				exit(EXIT_SUCCESS);
 			}
-			else if (strncasecmp(*argv, "-h", 2) == 0) {
+			else if (strncasecmp(*argv, "-h", 2) == 0 || strncasecmp(*argv, "--help", 2) == 0) {
 				print_usage();
-				exit(EXIT_FAILURE);
+				exit(EXIT_SUCCESS);
 			} else {
 				rfc_number = atoi(*argv);
 			}
