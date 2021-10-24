@@ -3,6 +3,7 @@
 #include <string.h>
 #include <curl/curl.h>
 #include <math.h>
+#include <errno.h>
 
 #define NAME "rfc"
 #define VERSION "0.0.1"
@@ -27,7 +28,8 @@ void print_usage() {
 
 int main(int argc, char *argv[]) {
 	if (argc > 1) {
-		int rfc_number = 0;
+		long rfc_number = 0;
+		char *end;
 
 		// Iterate over all args and handle them accordingly
 		for (argc--, argv++; *argv; argc--, argv++) {
@@ -39,7 +41,11 @@ int main(int argc, char *argv[]) {
 				print_usage();
 				exit(EXIT_SUCCESS);
 			} else {
-				rfc_number = atoi(*argv);
+				rfc_number = strtol(*argv, &end, 10);
+				if (end == *argv || *end != '\0' || errno == ERANGE) {
+					printf("error: invalid number '%s'\n", *argv);
+					exit(EXIT_FAILURE);
+				}
 			}
 		}
 
