@@ -10,6 +10,8 @@
 
 #define RFC_BASE_URL "https://www.rfc-editor.org/rfc/rfc"
 
+long rfc_number = 0;
+
 // Functions
 
 size_t writefunc(void *contents, size_t size, size_t nmemb) {
@@ -26,9 +28,40 @@ void print_usage() {
 	printf("Usage: %s [-h] [-V] [RFC NUMBER]\n", NAME);
 }
 
+void print_rfc() {
+	CURL *curl_handle;
+	CURLcode res;
+
+	char *url = malloc(sizeof(RFC_BASE_URL) + 10);
+	sprintf(url, "%s%lu.txt", RFC_BASE_URL, rfc_number);
+
+	curl_global_init(CURL_GLOBAL_ALL);
+
+	curl_handle = curl_easy_init();
+
+	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, writefunc);
+	curl_easy_setopt(curl_handle, CURLOPT_FAILONERROR, 1L);
+
+	res = curl_easy_perform(curl_handle);
+	
+	if (res != CURLE_OK) {
+		if (res == CURLE_HTTP_RETURNED_ERROR) {
+			long status;
+			curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &status);
+
+			if (status == 404) printf("error: invalid rfc number '%lu'\n", rfc_number);
+			else printf("error: server returned status code %lu", status);
+
+			exit(EXIT_FAILURE);
+		} else fprintf(stderr, "error: %s\n", curl_easy_strerror(res));
+	}
+
+	curl_easy_cleanup(curl_handle);
+}
+
 int main(int argc, char *argv[]) {
 	if (argc > 1) {
-		long rfc_number = 0;
 		char *end;
 
 		// Iterate over all args and handle them accordingly
@@ -46,39 +79,9 @@ int main(int argc, char *argv[]) {
 					printf("error: invalid number '%s'\n", *argv);
 					exit(EXIT_FAILURE);
 				}
+				print_rfc();
 			}
 		}
-
-		CURL *curl_handle;
-		CURLcode res;
-
-		char *url = malloc(sizeof(RFC_BASE_URL) + 10);
-		sprintf(url, "%s%lu.txt", RFC_BASE_URL, rfc_number);
-
-		curl_global_init(CURL_GLOBAL_ALL);
-
-		curl_handle = curl_easy_init();
-
-		curl_easy_setopt(curl_handle, CURLOPT_URL, url);
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, writefunc);
-		curl_easy_setopt(curl_handle, CURLOPT_FAILONERROR, 1L);
-
-		res = curl_easy_perform(curl_handle);
-		
-		if (res != CURLE_OK) {
-			if (res == CURLE_HTTP_RETURNED_ERROR) {
-				long status;
-				curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, &status);
-
-				if (status == 404) printf("error: invalid rfc number '%lu'\n", rfc_number);
-				else printf("error: server returned status code %lu", status);
-
-				exit(EXIT_FAILURE);
-			} else fprintf(stderr, "error: %s\n", curl_easy_strerror(res));
-		}
-
-		curl_easy_cleanup(curl_handle);
-
 	} else print_usage();
 
 	return 0;
