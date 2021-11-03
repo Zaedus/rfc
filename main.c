@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
 				rfc_number = strtol(*argv, &end, 10);
 				if (end == *argv || *end != '\0' || errno == ERANGE) {
 					printf("error: invalid number '%s'\n", *argv);
-					exit(EXIT_FAILURE);
+					continue;
 				}
 				print_rfc();
 			}
