@@ -33,11 +33,11 @@ int main(int argc, char *argv[]) {
 
 		// Iterate over all args and handle them accordingly
 		for (argc--, argv++; *argv; argc--, argv++) {
-			if (strncasecmp(*argv, "-V", 2) == 0 || strncasecmp(*argv, "--version", 2) == 0) {
+			if (strncasecmp(*argv, "-V", 2) == 0 || strncasecmp(*argv, "--version", 10) == 0) {
 				print_version();
 				exit(EXIT_SUCCESS);
 			}
-			else if (strncasecmp(*argv, "-h", 2) == 0 || strncasecmp(*argv, "--help", 2) == 0) {
+			else if (strncasecmp(*argv, "-h", 2) == 0 || strncasecmp(*argv, "--help", 7) == 0) {
 				print_usage();
 				exit(EXIT_SUCCESS);
 			} else {
